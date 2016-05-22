@@ -7,6 +7,10 @@ public class BasicMovement : MonoBehaviour {
     bool lookingRight = true;
     public bool isGrounded, topColl, rightColl, leftColl;
     float gravMod = 1.0f;
+    [SerializeField]
+    private Animator animator;
+
+    private GameObject idleChar;
 
     public bool leftStick = false;
     public bool rightStick = false;
@@ -28,17 +32,20 @@ public class BasicMovement : MonoBehaviour {
         
         if (hit.collider != null && col.tag != "Player")
         {
-            if(hit.point.y <= transform.position.y + height / 2.0f && hit.point.y >= transform.position.y + height * 0.4f)
-                topColl = true;
+            if (col.tag == "Floor" || col.tag == "Platform" || col.tag == "Door" || col.tag == "Acid")
+            {
+                if (hit.point.y <= transform.position.y + height / 2.0f && hit.point.y >= transform.position.y + height * 0.4f)
+                    topColl = true;
 
-            if (hit.point.y >= transform.position.y - height / 2.0f && hit.point.y <= transform.position.y - height * 0.4f)
-                isGrounded = true;
+                if (hit.point.y >= transform.position.y - height / 2.0f && hit.point.y <= transform.position.y - height * 0.4f)
+                    isGrounded = true;
 
-            if (hit.point.x <= transform.position.x + width / 2.0f && hit.point.x >= transform.position.x + width * 0.4f && (hit.point.y <= transform.position.y + (height*0.4f) || hit.point.y >= transform.position.y + (height*0.4f)))
-                rightColl = true;
+                if (hit.point.x <= transform.position.x + width / 2.0f && hit.point.x >= transform.position.x + width * 0.4f && (hit.point.y <= transform.position.y + (height * 0.4f) || hit.point.y >= transform.position.y + (height * 0.4f)))
+                    rightColl = true;
 
-            if (hit.point.x >= transform.position.x - width / 2.0f && hit.point.x <= transform.position.x - width * 0.4f && (hit.point.y <= transform.position.y + (height * 0.4f) || hit.point.y >= transform.position.y + (height * 0.4f)))
-                leftColl = true;
+                if (hit.point.x >= transform.position.x - width / 2.0f && hit.point.x <= transform.position.x - width * 0.4f && (hit.point.y <= transform.position.y + (height * 0.4f) || hit.point.y >= transform.position.y + (height * 0.4f)))
+                    leftColl = true;
+            }
         }
     }
 
@@ -90,6 +97,8 @@ public class BasicMovement : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        string childname = gameObject.name + "_Idle";
+        idleChar = transform.FindChild(childname).gameObject;
         direction = Vector2.zero;
         isGrounded = false;
         topColl = false;
@@ -114,6 +123,20 @@ public class BasicMovement : MonoBehaviour {
 
         if (leftColl && dirX < 0.0f)
             dirX = 0.0f;
+
+        if ((dirX > 0.0f || dirX < 0.0f) && animator != null)
+        {
+            animator.SetBool("Run", true);
+            //idleChar.SetActive(false);
+        }
+        else
+        {
+            if (dirX == 0.0f && animator != null)
+            {
+                animator.SetBool("Run", false);
+                //idleChar.(true);
+            }
+        }
 
         if(!isGrounded)
             dirY = -gravity * gravMod * weight * Time.deltaTime;
